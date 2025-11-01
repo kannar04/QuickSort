@@ -31,9 +31,9 @@ internal class Program
     {
         if (low < high)
         {
-            int pi = Partition(arr, low, high);
-            QuickSort(arr, low, pi - 1);
-            QuickSort(arr, pi + 1, high);
+            int pivot = Partition(arr, low, high);
+            QuickSort(arr, low, pivot - 1);
+            QuickSort(arr, pivot + 1, high);
         }
     }
     private static void Main(string[] args)
@@ -67,4 +67,5 @@ internal class Program
             Console.Write($"{ar.GetValue(i)} ");
         Console.WriteLine();*/
     }
+
 }
