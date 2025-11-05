@@ -1,71 +1,97 @@
-﻿using System.Text;
+using System.Text;
 
-internal class Program
+class Program
 {
-    static int Partition(Array arr, int low, int high)
+    static void swap(int[] arr, int i, int j)
     {
-        int pivot = (int)arr.GetValue(high);
-        int i = low - 1;
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
 
+    static int partition(int[] arr, int low, int high)
+    {
+        int pivot = arr[high];
+        int i = low - 1;
         for (int j = low; j <= high - 1; j++)
         {
-            if ((int)arr.GetValue(j) < pivot)
+            if (arr[j] < pivot)
             {
                 i++;
-                Swap(arr, i, j);
+                swap(arr, i, j);
             }
         }
-
-        Swap(arr, i + 1, high);
+        swap(arr, i + 1, high);
         return i + 1;
     }
 
-    static void Swap(Array arr, int i, int j)
-    {
-        int temp = (int)arr.GetValue(i);
-        arr.SetValue(arr.GetValue(j), i);
-        arr.SetValue(temp, j);
-    }
-
-    static void QuickSort(Array arr, int low, int high)
+    static void quickSort(int[] arr, int low, int high)
     {
         if (low < high)
         {
-            int pivot = Partition(arr, low, high);
-            QuickSort(arr, low, pivot - 1);
-            QuickSort(arr, pivot + 1, high);
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
         }
     }
-    private static void Main(string[] args)
+
+    static int[] GenerateValue(int size)
     {
-        Console.Clear();
-        Console.OutputEncoding = Encoding.Unicode;
-        Console.InputEncoding = Encoding.Unicode;
-        
-
-        int n = 1000000; 
-        Array ar = Array.CreateInstance(typeof(int), n);
-        Random rnd = new Random();
-
-        for (int i = 0; i < n; i++)
-            ar.SetValue(rnd.Next(1, 1000), i);
-
-        /*Console.WriteLine("Trước khi sắp xếp:");
-        for (int i = 0; i < n; i++)
-            Console.Write($"{ar.GetValue(i)} ");
-        Console.WriteLine();*/
-
-
-        Timing t = new Timing();
-        t.startTime();
-        QuickSort(ar, 0, n - 1);
-        t.StopTime();
-        Console.WriteLine($"Thời gian để sắp xếp: {t.Result().TotalMilliseconds:F4} ms");
-
-        /*Console.WriteLine("\nSau khi sắp xếp:");
-        for (int i = 0; i < n; i++)
-            Console.Write($"{ar.GetValue(i)} ");
-        Console.WriteLine();*/
+        Random rand = new Random();
+        int[] arr = new int[size];
+        for (int i = 0; i < size; i++)
+        {
+            arr[i] = rand.Next(0, 100000);
+        }
+        return arr;
     }
 
+    static void Main(string[] args)
+    {
+        int size = 100000;
+        int times = 1000000;
+        Timing timer = new Timing();
+
+        int[] arrBase = GenerateValue(size);
+
+        int[] arrBest = new int[size];
+        int[] arrAvg = new int[size];
+        int[] arrWorst = new int[size];
+        Array.Copy(arrBase, arrAvg, size);   // average
+        Array.Copy(arrBase, arrBest, size);  // best
+        Array.Copy(arrBase, arrWorst, size); // worst
+
+        // Best Case: sắp xếp tăng dần (pivot chia đều)
+        Array.Sort(arrBest);
+
+        // Worst Case: sắp xếp giảm dần (pivot cuối cùng cực lệch)
+        Array.Sort(arrWorst);
+        Array.Reverse(arrWorst);
+
+        // Đo thời gian 
+        timer.startTime();
+        for (int i = 0; i < times; i++)
+            quickSort(arrBest, 0, size - 1);
+        timer.stopTime();
+        double bestTime = timer.Result().TotalMilliseconds / times;
+
+        timer.startTime();
+        for (int i = 0; i < times; i++)
+            quickSort(arrAvg, 0, size - 1);
+        timer.stopTime();
+        double avgTime = timer.Result().TotalMilliseconds / times;
+
+        timer.startTime();
+        for (int i = 0; i < times; i++)
+            quickSort(arrWorst, 0, size - 1);
+        timer.stopTime();
+        double worstTime = timer.Result().TotalMilliseconds / times;
+
+        // In kết quả
+        Console.WriteLine("==== Kết quả thời gian (QuickSort) ====");
+        Console.WriteLine($"Số phần tử: {size:N0}");
+        Console.WriteLine($"Tốt nhất   : {bestTime:F2} ms");
+        Console.WriteLine($"Trung bình : {avgTime:F2} ms");
+        Console.WriteLine($"Xấu nhất   : {worstTime:F2} ms");
+    }
 }
