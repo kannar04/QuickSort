@@ -52,7 +52,7 @@ class Program
         int times = 1000;
         Timing t = new Timing();
 
-        // ====== 1. Trường hợp tốt nhất (mảng ngẫu nhiên) ======
+        //1. Trường hợp tốt nhất (mảng ngẫu nhiên) 
         int[] best = GenerateValue(size);
         t.startTime();
         for (int i = 0; i < times; i++)
@@ -63,7 +63,7 @@ class Program
         t.stopTime();
         Console.WriteLine($"Thời gian trung bình (trường hợp tốt nhất): {t.Result().TotalMilliseconds / times} ms");
 
-        // ====== 2. Trường hợp trung bình (mảng gần ngẫu nhiên) ======
+        //2. Trường hợp trung bình (mảng gần ngẫu nhiên)
         int[] avg = GenerateValue(size);
         Array.Sort(avg); // sắp xếp rồi đảo một phần => "gần như ngẫu nhiên"
         for (int i = 0; i < size / 10; i++)
@@ -83,7 +83,7 @@ class Program
         t.stopTime();
         Console.WriteLine($"Thời gian trung bình (trường hợp trung bình): {t.Result().TotalMilliseconds / times} ms");
 
-        // ====== 3. Trường hợp xấu nhất (mảng tăng dần) ======
+        //3. Trường hợp xấu nhất (mảng tăng dần)
         int[] worst = new int[size];
         for (int i = 0; i < size; i++) worst[i] = i;
         t.startTime();
@@ -96,3 +96,4 @@ class Program
         Console.WriteLine($"Thời gian trung bình (trường hợp xấu nhất): {t.Result().TotalMilliseconds / times} ms");
     }
 }
+
