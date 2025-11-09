@@ -1,22 +1,11 @@
-using System;
+using System.Text;
 
 class Program
 {
-    static int partition(int[] arr, int low, int high, string mode)
+    static int partition(int[] arr, int low, int high)
     {
-        int pivotIndex;
-
-        if (mode == "best")
-            pivotIndex = (low + high) / 2;     // pivot giữa
-        else if (mode == "average")
-            pivotIndex = new Random().Next(low, high + 1); // pivot ngẫu nhiên
-        else
-            pivotIndex = high;                 // pivot cuối → worst case
-
-        int pivot = arr[pivotIndex];
-        swap(arr, pivotIndex, high); // đưa pivot về cuối
+        int pivot = arr[high];
         int i = low - 1;
-
         for (int j = low; j <= high - 1; j++)
         {
             if (arr[j] < pivot)
@@ -25,11 +14,9 @@ class Program
                 swap(arr, i, j);
             }
         }
-
         swap(arr, i + 1, high);
         return i + 1;
     }
-
     static void swap(int[] arr, int i, int j)
     {
         int temp = arr[i];
@@ -37,13 +24,13 @@ class Program
         arr[j] = temp;
     }
 
-    static void quickSort(int[] arr, int low, int high, string mode)
+    static void quickSort(int[] arr, int low, int high)
     {
         if (low < high)
         {
-            int pi = partition(arr, low, high, mode);
-            quickSort(arr, low, pi - 1, mode);
-            quickSort(arr, pi + 1, high, mode);
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
         }
     }
 
@@ -52,42 +39,60 @@ class Program
         Random rand = new Random();
         int[] arr = new int[size];
         for (int i = 0; i < size; i++)
+        {
             arr[i] = rand.Next(0, 100000);
+        }
         return arr;
     }
 
     static void Main(string[] args)
     {
-        Timing timer = new Timing();
+        Console.OutputEncoding = Encoding.UTF8;
         int size = 10000;
         int times = 1000;
+        Timing t = new Timing();
 
-        int[] data = GenerateValue(size);
-
-        int[] best = (int[])data.Clone();
-        Array.Sort(best); // sắp xếp tăng dần
-        int[] clone = (int[])best.Clone();
-        timer.startTime();
+        // ====== 1. Trường hợp tốt nhất (mảng ngẫu nhiên) ======
+        int[] best = GenerateValue(size);
+        t.startTime();
         for (int i = 0; i < times; i++)
-            quickSort(clone, 0, size - 1, "best");
-        timer.stopTime();
-        Console.WriteLine($"Best case: {timer.Result().TotalMilliseconds / times:F4} ms");
+        {
+            int[] copy = (int[])best.Clone();
+            quickSort(copy, 0, copy.Length - 1);
+        }
+        t.stopTime();
+        Console.WriteLine($"Thời gian trung bình (trường hợp tốt nhất): {t.Result().TotalMilliseconds / times} ms");
 
-        int[] avg = (int[])data.Clone();
-        timer.startTime();
+        // ====== 2. Trường hợp trung bình (mảng gần ngẫu nhiên) ======
+        int[] avg = GenerateValue(size);
+        Array.Sort(avg); // sắp xếp rồi đảo một phần => "gần như ngẫu nhiên"
+        for (int i = 0; i < size / 10; i++)
+        {
+            int a = i;
+            int b = size - i - 1;
+            int temp = avg[a];
+            avg[a] = avg[b];
+            avg[b] = temp;
+        }
+        t.startTime();
         for (int i = 0; i < times; i++)
-            quickSort((int[])avg.Clone(), 0, size - 1, "average");
-        timer.stopTime();
-        Console.WriteLine($"Average case: {timer.Result().TotalMilliseconds / times:F4} ms");
+        {
+            int[] copy = (int[])avg.Clone();
+            quickSort(copy, 0, copy.Length - 1);
+        }
+        t.stopTime();
+        Console.WriteLine($"Thời gian trung bình (trường hợp trung bình): {t.Result().TotalMilliseconds / times} ms");
 
-        int[] worstDesc = (int[])data.Clone();
-        Array.Sort(worstDesc);
-        Array.Reverse(worstDesc); // sắp xếp giảm dần
-        int[] clone2 = (int[])worstDesc.Clone();
-        timer.startTime();
+        // ====== 3. Trường hợp xấu nhất (mảng tăng dần) ======
+        int[] worst = new int[size];
+        for (int i = 0; i < size; i++) worst[i] = i;
+        t.startTime();
         for (int i = 0; i < times; i++)
-            quickSort(clone2, 0, size - 1, "worst");
-        timer.stopTime();
-        Console.WriteLine($"Worst case (descending): {timer.Result().TotalMilliseconds / times:F4} ms");
+        {
+            int[] copy = (int[])worst.Clone();
+            quickSort(copy, 0, copy.Length - 1);
+        }
+        t.stopTime();
+        Console.WriteLine($"Thời gian trung bình (trường hợp xấu nhất): {t.Result().TotalMilliseconds / times} ms");
     }
 }
